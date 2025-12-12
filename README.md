@@ -1,2 +1,3 @@
-# ddrive-m
-Data-Driven Risk &amp; Vulnerability Evaluation and Management  
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
