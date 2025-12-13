@@ -15,7 +15,7 @@ import DDRiVERWidget from "@/components/DDRiVERWidget";
 import Dashboard from "@/pages/Dashboard";
 import DDRiVERPage from "@/pages/DDRiVER";
 import RiskAssessment from "@/pages/RiskAssessment";
-import Sparc from "@/pages/Sparc";
+import SparcLGU from "@/pages/SparcLGU";
 import PlanGenerator from "@/pages/PlanGenerator";
 import PlanLibrary from "@/pages/PlanLibrary";
 import Compliance from "@/pages/Compliance";
