@@ -15,10 +15,12 @@ import DDRiVERWidget from "@/components/DDRiVERWidget";
 import Dashboard from "@/pages/Dashboard";
 import DDRiVERPage from "@/pages/DDRiVER";
 import RiskAssessment from "@/pages/RiskAssessment";
+import Sparc from "@/pages/Sparc";
 import PlanGenerator from "@/pages/PlanGenerator";
 import PlanLibrary from "@/pages/PlanLibrary";
 import Compliance from "@/pages/Compliance";
 import Collaboration from "@/pages/Collaboration";
+import About from "@/pages/About";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,11 +41,13 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/risk-assessment" element={<RiskAssessment />} />
+                  <Route path="/sparc" element={<Sparc />} />
                   <Route path="/plan-generator" element={<PlanGenerator />} />
                   <Route path="/plan-library" element={<PlanLibrary />} />
                   <Route path="/compliance" element={<Compliance />} />
                   <Route path="/collaboration" element={<Collaboration />} />
                   <Route path="/ddriver" element={<DDRiVERPage />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
