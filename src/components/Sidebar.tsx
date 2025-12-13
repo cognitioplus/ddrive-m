@@ -7,10 +7,10 @@ import {
   Library,
   CheckSquare,
   Users,
+  Zap,
   Bot,
   Info,
-  Zap,
-} from "lucide-react"; // Added icons for new items
+} from "lucide-react"; // Icons for navigation items
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -23,7 +23,7 @@ const Sidebar: React.FC = () => {
     { path: "/compliance", icon: CheckSquare, label: "Compliance" },
     { path: "/collaboration", icon: Users, label: "Collaboration" },
 
-    // New items
+    // Newly added items
     { path: "/sparc", icon: Zap, label: "SPARC" },
     { path: "/ddriver", icon: Bot, label: "DDRiVER" },
     { path: "/about", icon: Info, label: "About" },
@@ -31,6 +31,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-64 bg-slate-900 text-white min-h-screen flex flex-col">
+      {/* Logo and title */}
       <div className="p-4 border-b border-slate-700">
         <img
           src="https://img1.wsimg.com/isteam/ip/58ed6e8f-da3e-442a-9a56-be3eddf67a9d/DDRiVE-M%20icon%20and%20logo.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:200,h:200,cg:true"
@@ -40,6 +41,7 @@ const Sidebar: React.FC = () => {
         <h1 className="text-sm font-semibold">DDRiVE-M</h1>
       </div>
 
+      {/* Navigation links */}
       <nav className="flex-1 p-4">
         {navItems.map((item) => {
           const Icon = item.icon;
