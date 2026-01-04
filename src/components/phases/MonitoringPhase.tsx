@@ -1,5 +1,4 @@
-// src/components/phases/MonitoringPhase.tsx
-import React, { useState } from 'react'; // ✅ Removed unused useEffect
+import React, { useState } from 'react';
 import {
   Monitor,
   Video,
@@ -21,7 +20,8 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
-import PhaseHeader from '../PhaseHeader'; // ✅ FIXED: default import
+import PhaseHeader from '../PhaseHeader';
+import Collaboration from '../Collaboration'; // ✅ Import Collaboration component
 
 // Mock initial data
 const mockEvents = [
@@ -209,7 +209,8 @@ const mockChatMessages = [
   },
 ];
 
-export const MonitoringPhase: React.FC = () => {
+// ✅ DEFAULT EXPORT — REQUIRED FOR App.tsx COMPATIBILITY
+const MonitoringPhase: React.FC = () => {
   const [events, setEvents] = useState(mockEvents);
   const [teamMembers, setTeamMembers] = useState(mockTeamMembers);
   const [tasks, setTasks] = useState(mockTasks);
@@ -460,6 +461,18 @@ export const MonitoringPhase: React.FC = () => {
         colorClass="bg-stone-700"
       />
 
+      {/* ✅ Enhanced Team Collaboration Module */}
+      <Collaboration
+        teamMembers={teamMembers}
+        chatMessages={chatMessages}
+        onAddMessage={handleAddMessage}
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        mockAgencies={mockAgencies}
+        getAgencyColor={getAgencyColor}
+        setShowAddMessageModal={setShowAddMessageModal}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div className="bg-white p-6 rounded-lg shadow border-l-4 border-red-600">
           <div className="flex items-center justify-between">
@@ -614,134 +627,6 @@ export const MonitoringPhase: React.FC = () => {
                       >
                         <X className="w-3 h-3" />
                       </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Multi-Agency Chat Stream
-            </h3>
-            <button onClick={() => setShowAddMessageModal(true)} className="text-purple-600 hover:text-purple-800">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="p-4 h-96 overflow-y-auto">
-            {chatMessages.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                <p>No messages yet. Start the conversation!</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {chatMessages.map((msg) => (
-                  <div key={msg.id} className={`rounded-lg p-3 border-l-4 ${msg.color}`}>
-                    <div className="flex items-start justify-between mb-1">
-                      <span className="font-semibold text-sm">{msg.agency}</span>
-                      <span className="text-xs opacity-70">{msg.timestamp}</span>
-                    </div>
-                    <p className="text-sm opacity-90">{msg.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex space-x-2">
-              <select
-                value={newMessage.agency}
-                onChange={(e) => setNewMessage({ ...newMessage, agency: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-700"
-              >
-                {mockAgencies.slice(0, 7).map((agency) => (
-                  <option key={agency} value={agency}>
-                    {agency}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={newMessage.message}
-                onChange={(e) => setNewMessage({ ...newMessage, message: e.target.value })}
-                placeholder="Type message..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-700"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && newMessage.message.trim()) {
-                    handleAddMessage();
-                  }
-                }}
-              />
-              <button
-                onClick={handleAddMessage}
-                disabled={!newMessage.message.trim()}
-                className="bg-stone-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-stone-800 transition-colors disabled:opacity-50"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2 text-red-600" />
-              Critical Alert Monitor
-            </h3>
-            <button onClick={() => setShowAddEventModal(true)} className="text-red-600 hover:text-red-800">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="p-4 max-h-96 overflow-y-auto">
-            {events.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <AlertTriangle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                <p>No alerts currently active</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {recentEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className={`border-2 rounded-lg p-3 transition-all mb-2 ${getSeverityColor(
-                      event.severity
-                    )} relative group`}
-                  >
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => removeEvent(event.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Remove alert"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <div className="flex items-start justify-between mb-1">
-                      <div className="flex items-center space-x-2">
-                        <span className={`w-2 h-2 rounded-full ${getSeverityDot(event.severity)}`}></span>
-                        <span className="font-semibold text-sm">{event.event_type}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                          event.status
-                        )}`}>
-                          {event.status}
-                        </span>
-                      </div>
-                      <span className="text-xs opacity-70">
-                        {new Date(event.created_at).toLocaleTimeString('en-PH')}
-                      </span>
-                    </div>
-                    <p className="text-sm opacity-90 ml-4">{event.message}</p>
-                    <div className="flex justify-between items-center mt-2 ml-4 text-xs">
-                      <span className="opacity-70">Source: {event.source}</span>
-                      <span className="opacity-70">Assigned: {event.assigned_to}</span>
                     </div>
                   </div>
                 ))}
@@ -936,17 +821,101 @@ export const MonitoringPhase: React.FC = () => {
         </div>
       </div>
 
-      {/* Modals (Add Member, Task, Event, Message) */}
+      {/* Modals (Add Member, Task, Event) */}
       {showAddMemberModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          {/* ... (modal content unchanged) ... */}
-          {/* You may keep your existing modal JSX as is — only the import was broken */}
-          {/* For brevity, modals are omitted here but remain functionally identical */}
-          {/* All modals use the same corrected logic */}
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add Team Member</h3>
+              <button
+                onClick={() => setShowAddMemberModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  value={newMember.name}
+                  onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                <select
+                  value={newMember.role}
+                  onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select role</option>
+                  {mockRoles.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Agency *</label>
+                <select
+                  value={newMember.agency}
+                  onChange={(e) => setNewMember({ ...newMember, agency: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select agency</option>
+                  {mockAgencies.map((agency) => (
+                    <option key={agency} value={agency}>
+                      {agency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact</label>
+                <input
+                  type="email"
+                  value={newMember.contact}
+                  onChange={(e) => setNewMember({ ...newMember, contact: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Email address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Expertise</label>
+                <textarea
+                  value={newMember.expertise}
+                  onChange={(e) => setNewMember({ ...newMember, expertise: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                  placeholder="e.g., Emergency Response, Logistics"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => setShowAddMemberModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddMember}
+                  disabled={!newMember.name || !newMember.role || !newMember.agency}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <User className="w-4 h-4 mr-2 inline" />
+                  Add Member
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Other modals remain unchanged — they were already correct */}
       {showAddTaskModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -959,7 +928,6 @@ export const MonitoringPhase: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {/* ... rest of modal ... */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Task Title *</label>
@@ -1155,63 +1123,10 @@ export const MonitoringPhase: React.FC = () => {
         </div>
       )}
 
-      {showAddMessageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Send Message</h3>
-              <button
-                onClick={() => setShowAddMessageModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Agency *</label>
-                <select
-                  value={newMessage.agency}
-                  onChange={(e) => setNewMessage({ ...newMessage, agency: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {mockAgencies.slice(0, 7).map((agency) => (
-                    <option key={agency} value={agency}>
-                      {agency}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
-                <textarea
-                  value={newMessage.message}
-                  onChange={(e) => setNewMessage({ ...newMessage, message: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  rows={4}
-                  placeholder="Enter your message"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => setShowAddMessageModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddMessage}
-                  disabled={!newMessage.message.trim()}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2 inline" />
-                  Send Message
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add Message modal is now handled by Collaboration.tsx — remove duplicate */}
     </div>
   );
 };
+
+// ✅ DEFAULT EXPORT — RESOLVES BUILD ERROR
+export default MonitoringPhase;
