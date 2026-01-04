@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { BarChart3, TrendingUp, AlertCircle, Map, Download, Filter, Upload } from 'lucide-react';
 import PhaseHeader from '../PhaseHeader';
+import GeoRiskPanel from '../GeoRiskPanel'; // ✅ Import GeoRiskPanel
 
-export default function DiagnosisPhase() {
+const DiagnosisPhase: React.FC = () => {
   const [activeView, setActiveView] = useState<'heatmap' | 'vulnerability' | 'impact'>('heatmap');
   const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null);
 
@@ -62,9 +63,14 @@ export default function DiagnosisPhase() {
   return (
     <div className="space-y-6">
       <PhaseHeader 
-        title="Diagnosis" 
+        icon={BarChart3}
+        title="Phase 2: Diagnosis"
         description="Risk Analysis & Vulnerability Assessment Framework"
+        colorClass="bg-emerald-700" // ✅ Diagnosis-themed color
       />
+
+      {/* 🔹 GeoRisk Integration Panel — NEW */}
+      <GeoRiskPanel />
 
       {/* Action Bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
@@ -96,7 +102,7 @@ export default function DiagnosisPhase() {
             onClick={() => setActiveView(tab.id as any)}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               activeView === tab.id
-                ? 'text-blue-400 border-b-2 border-blue-400'
+                ? 'text-emerald-400 border-b-2 border-emerald-400'
                 : 'text-slate-400 hover:text-slate-300'
             }`}
           >
@@ -347,4 +353,6 @@ export default function DiagnosisPhase() {
       )}
     </div>
   );
-}
+};
+
+export default DiagnosisPhase;
