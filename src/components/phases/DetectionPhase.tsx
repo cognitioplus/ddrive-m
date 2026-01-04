@@ -2,10 +2,15 @@ import React from 'react';
 import { Search, Layers, Filter, Eye, AlertTriangle, Activity } from 'lucide-react';
 import PhaseHeader from '../PhaseHeader';
 
-export default function DetectionPhase() {
+const DetectionPhase: React.FC = () => {
   return (
     <div className="space-y-6">
-      <PhaseHeader title="Detection" description="Multi-Source Data Collection & Monitoring" />
+      <PhaseHeader
+        icon={Search}
+        title="Phase 1: Detection"
+        description="Multi-Source Data Collection & Monitoring"
+        colorClass="bg-blue-700"
+      />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Interface */}
@@ -109,4 +114,6 @@ export default function DetectionPhase() {
       </div>
     </div>
   );
-}
+};
+
+export default DetectionPhase;
