@@ -1,165 +1,214 @@
-import { useState, useEffect } from 'react';
-import { Cog, CheckCircle, Clock, AlertCircle, Plus, Save, X, Target, Users, Shield, Zap } from 'lucide-react';
-import { PhaseHeader } from '../PhaseHeader';
+import React, { useState } from 'react';
+import {
+  Cog,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Plus,
+  Save,
+  X,
+  Target,
+} from 'lucide-react';
+import PhaseHeader from '../PhaseHeader';
 
-// Mock data for risks from Diagnosis phase
+// ===== MOCK DATA =====
 const mockRisks = [
   {
     id: 1,
-    title: "Typhoon damage to infrastructure",
+    title: 'Typhoon damage to infrastructure',
     hazard_id: 1,
     likelihood: 4,
     impact: 5,
     risk_score: 20,
-    classification: "Critical",
-    category: "Natural Disaster",
-    ai_summary: "High probability of typhoon occurrence during rainy season with severe impact on facility operations."
+    classification: 'Critical',
+    category: 'Natural Disaster',
+    ai_summary:
+      'High probability of typhoon occurrence during rainy season with severe impact on facility operations.',
   },
   {
     id: 2,
-    title: "Earthquake structural damage",
+    title: 'Earthquake structural damage',
     hazard_id: 2,
     likelihood: 3,
     impact: 5,
     risk_score: 15,
-    classification: "High",
-    category: "Natural Disaster",
-    ai_summary: "Moderate earthquake probability with potential for significant structural damage."
+    classification: 'High',
+    category: 'Natural Hazard',
+    ai_summary:
+      'Moderate earthquake probability with potential for significant structural damage.',
   },
   {
     id: 3,
-    title: "Fire incident in warehouse",
+    title: 'Fire incident in warehouse',
     hazard_id: 3,
     likelihood: 2,
     impact: 4,
     risk_score: 8,
-    classification: "Medium",
-    category: "Safety",
-    ai_summary: "Low fire probability but high potential impact on inventory and operations."
+    classification: 'Medium',
+    category: 'Safety',
+    ai_summary:
+      'Low fire probability but high potential impact on inventory and operations.',
   },
   {
     id: 4,
-    title: "Data breach from cyber attack",
+    title: 'Data breach from cyber attack',
     hazard_id: 5,
     likelihood: 3,
     impact: 4,
     risk_score: 12,
-    classification: "High",
-    category: "Cybersecurity",
-    ai_summary: "Moderate cyber threat with significant business impact potential."
+    classification: 'High',
+    category: 'Cybersecurity',
+    ai_summary:
+      'Moderate cyber threat with significant business impact potential.',
   },
   {
     id: 5,
-    title: "Supply chain disruption",
+    title: 'Supply chain disruption',
     hazard_id: 6,
     likelihood: 3,
     impact: 3,
     risk_score: 9,
-    classification: "Medium",
-    category: "Operational",
-    ai_summary: "Moderate probability of supply chain issues affecting business continuity."
-  }
+    classification: 'Medium',
+    category: 'Operational',
+    ai_summary:
+      'Moderate probability of supply chain issues affecting business continuity.',
+  },
 ];
 
-// Mock existing response actions
 const mockActions = [
   {
     id: 1,
-    action_type: "Emergency Evacuation Plan",
-    description: "Establish comprehensive evacuation procedures for typhoon scenarios",
-    status: "Completed",
-    priority: "Critical",
+    action_type: 'Emergency Evacuation Plan',
+    description: 'Establish comprehensive evacuation procedures for typhoon scenarios',
+    status: 'Completed' as const,
+    priority: 'Critical' as const,
     risk_id: 1,
-    risk_category: "Natural Disaster",
-    assigned_agency: "NDRRMC",
-    local_controls: "LGU evacuation protocols, PHIVOLCS early warning integration",
-    timeline: "Immediate",
-    resources_needed: ["Evacuation vehicles", "Emergency shelters", "Medical supplies"],
-    responsible_team: "DRRM Committee",
-    created_at: "2025-12-28T08:00:00Z"
+    risk_category: 'Natural Hazard',
+    assigned_agency: 'NDRRMC',
+    local_controls: 'LGU evacuation protocols, PHIVOLCS early warning integration',
+    timeline: 'Immediate',
+    resources_needed: 'Evacuation vehicles, Emergency shelters, Medical supplies',
+    responsible_team: 'DRRM Committee',
+    created_at: '2025-12-28T08:00:00Z',
   },
   {
     id: 2,
-    action_type: "Structural Reinforcement",
-    description: "Retrofit building structures to withstand earthquake forces",
-    status: "In Progress",
-    priority: "High",
+    action_type: 'Structural Reinforcement',
+    description: 'Retrofit building structures to withstand earthquake forces',
+    status: 'In Progress' as const,
+    priority: 'High' as const,
     risk_id: 2,
-    risk_category: "Natural Disaster",
-    assigned_agency: "DPWH",
-    local_controls: "Building code compliance, Structural engineering standards",
-    timeline: "3 months",
-    resources_needed: ["Structural engineers", "Reinforcement materials", "Safety equipment"],
-    responsible_team: "Engineering Department",
-    created_at: "2025-12-27T10:00:00Z"
-  }
+    risk_category: 'Natural Hazard',
+    assigned_agency: 'DPWH',
+    local_controls: 'Building code compliance, Structural engineering standards',
+    timeline: '3 months',
+    resources_needed: 'Structural engineers, Reinforcement materials, Safety equipment',
+    responsible_team: 'Engineering Department',
+    created_at: '2025-12-27T10:00:00Z',
+  },
 ];
 
-// Treatment strategies by risk category
-const treatmentStrategiesByCategory = {
-  "Natural Disaster": [
-    { strategy: "Early warning system implementation", timeline: "1-2 weeks", resources: "Weather monitoring equipment, communication systems" },
-    { strategy: "Evacuation plan development and drills", timeline: "2-4 weeks", resources: "Emergency vehicles, shelters, trained personnel" },
-    { strategy: "Infrastructure reinforcement", timeline: "1-6 months", resources: "Engineering expertise, construction materials" },
-    { strategy: "Emergency supplies stockpiling", timeline: "1-2 weeks", resources: "Food, water, medical supplies, generators" },
-    { strategy: "Community preparedness training", timeline: "Ongoing", resources: "Training materials, facilitators, venues" }
+const treatmentStrategiesByCategory: Record<
+  string,
+  Array<{ strategy: string; timeline: string; resources: string }>
+> = {
+  'Natural Hazard': [
+    { strategy: 'Early warning system implementation', timeline: '1-2 weeks', resources: 'Weather monitoring equipment, communication systems' },
+    { strategy: 'Evacuation plan development and drills', timeline: '2-4 weeks', resources: 'Emergency vehicles, shelters, trained personnel' },
+    { strategy: 'Infrastructure reinforcement', timeline: '1-6 months', resources: 'Engineering expertise, construction materials' },
+    { strategy: 'Emergency supplies stockpiling', timeline: '1-2 weeks', resources: 'Food, water, medical supplies, generators' },
+    { strategy: 'Community preparedness training', timeline: 'Ongoing', resources: 'Training materials, facilitators, venues' },
   ],
-  "Safety": [
-    { strategy: "Fire safety equipment installation", timeline: "1-2 weeks", resources: "Fire extinguishers, alarms, sprinkler systems" },
-    { strategy: "Safety protocol implementation", timeline: "1 week", resources: "Safety manuals, signage, training materials" },
-    { strategy: "Emergency response training", timeline: "2-4 weeks", resources: "Trainers, simulation equipment, venues" },
-    { strategy: "Regular safety inspections", timeline: "Monthly", resources: "Inspection checklists, safety officers" },
-    { strategy: "Personal protective equipment (PPE) provision", timeline: "Immediate", resources: "PPE inventory, distribution system" }
+  Safety: [
+    { strategy: 'Fire safety equipment installation', timeline: '1-2 weeks', resources: 'Fire extinguishers, alarms, sprinkler systems' },
+    { strategy: 'Safety protocol implementation', timeline: '1 week', resources: 'Safety manuals, signage, training materials' },
+    { strategy: 'Emergency response training', timeline: '2-4 weeks', resources: 'Trainers, simulation equipment, venues' },
+    { strategy: 'Regular safety inspections', timeline: 'Monthly', resources: 'Inspection checklists, safety officers' },
+    { strategy: 'Personal protective equipment (PPE) provision', timeline: 'Immediate', resources: 'PPE inventory, distribution system' },
   ],
-  "Cybersecurity": [
-    { strategy: "Firewall and security software implementation", timeline: "1-2 weeks", resources: "Security software licenses, IT personnel" },
-    { strategy: "Regular security audits", timeline: "Quarterly", resources: "Security auditors, assessment tools" },
-    { strategy: "Employee cybersecurity training", timeline: "Monthly", resources: "Training platforms, cybersecurity experts" },
-    { strategy: "Data backup and recovery systems", timeline: "1-2 weeks", resources: "Backup infrastructure, cloud storage" },
-    { strategy: "Incident response planning", timeline: "2-4 weeks", resources: "Response team, communication protocols" }
+  Cybersecurity: [
+    { strategy: 'Firewall and security software implementation', timeline: '1-2 weeks', resources: 'Security software licenses, IT personnel' },
+    { strategy: 'Regular security audits', timeline: 'Quarterly', resources: 'Security auditors, assessment tools' },
+    { strategy: 'Employee cybersecurity training', timeline: 'Monthly', resources: 'Training platforms, cybersecurity experts' },
+    { strategy: 'Data backup and recovery systems', timeline: '1-2 weeks', resources: 'Backup infrastructure, cloud storage' },
+    { strategy: 'Incident response planning', timeline: '2-4 weeks', resources: 'Response team, communication protocols' },
   ],
-  "Operational": [
-    { strategy: "Process redundancy implementation", timeline: "1-3 months", resources: "Alternative systems, process documentation" },
-    { strategy: "Supply chain diversification", timeline: "2-6 months", resources: "Supplier database, procurement team" },
-    { strategy: "Staff cross-training", timeline: "1-3 months", resources: "Training programs, experienced staff" },
-    { strategy: "Alternative resource planning", timeline: "1-2 months", resources: "Resource inventory, contingency budget" },
-    { strategy: "Business continuity planning", timeline: "1-3 months", resources: "BCP framework, stakeholder engagement" }
+  Operational: [
+    { strategy: 'Process redundancy implementation', timeline: '1-3 months', resources: 'Alternative systems, process documentation' },
+    { strategy: 'Supply chain diversification', timeline: '2-6 months', resources: 'Supplier database, procurement team' },
+    { strategy: 'Staff cross-training', timeline: '1-3 months', resources: 'Training programs, experienced staff' },
+    { strategy: 'Alternative resource planning', timeline: '1-2 months', resources: 'Resource inventory, contingency budget' },
+    { strategy: 'Business continuity planning', timeline: '1-3 months', resources: 'BCP framework, stakeholder engagement' },
   ],
-  "Legal": [
-    { strategy: "Regulatory compliance review", timeline: "1-2 months", resources: "Legal counsel, compliance checklists" },
-    { strategy: "Legal counsel engagement", timeline: "Immediate", resources: "Legal retainer, consultation fees" },
-    { strategy: "Policy and procedure updates", timeline: "1-2 months", resources: "Policy templates, legal review" },
-    { strategy: "Staff legal awareness training", timeline: "1 month", resources: "Training materials, legal experts" },
-    { strategy: "Documentation and record keeping", timeline: "Ongoing", resources: "Document management system, storage" }
+  Legal: [
+    { strategy: 'Regulatory compliance review', timeline: '1-2 months', resources: 'Legal counsel, compliance checklists' },
+    { strategy: 'Legal counsel engagement', timeline: 'Immediate', resources: 'Legal retainer, consultation fees' },
+    { strategy: 'Policy and procedure updates', timeline: '1-2 months', resources: 'Policy templates, legal review' },
+    { strategy: 'Staff legal awareness training', timeline: '1 month', resources: 'Training materials, legal experts' },
+    { strategy: 'Documentation and record keeping', timeline: 'Ongoing', resources: 'Document management system, storage' },
   ],
-  "Health": [
-    { strategy: "Health and safety protocols", timeline: "1 week", resources: "Protocol templates, health officers" },
-    { strategy: "Medical emergency response plan", timeline: "2-4 weeks", resources: "Medical personnel, emergency equipment" },
-    { strategy: "Health monitoring systems", timeline: "1-2 months", resources: "Monitoring equipment, health data systems" },
-    { strategy: "Sanitation and hygiene measures", timeline: "Immediate", resources: "Cleaning supplies, hygiene stations" },
-    { strategy: "Healthcare provider partnerships", timeline: "1-2 months", resources: "Partnership agreements, coordination meetings" }
-  ]
+  Health: [
+    { strategy: 'Health and safety protocols', timeline: '1 week', resources: 'Protocol templates, health officers' },
+    { strategy: 'Medical emergency response plan', timeline: '2-4 weeks', resources: 'Medical personnel, emergency equipment' },
+    { strategy: 'Health monitoring systems', timeline: '1-2 months', resources: 'Monitoring equipment, health data systems' },
+    { strategy: 'Sanitation and hygiene measures', timeline: 'Immediate', resources: 'Cleaning supplies, hygiene stations' },
+    { strategy: 'Healthcare provider partnerships', timeline: '1-2 months', resources: 'Partnership agreements, coordination meetings' },
+  ],
 };
 
-// Philippine agencies by category
-const agenciesByCategory = {
-  "Natural Disaster": ["NDRRMC", "PAGASA", "PHIVOLCS", "DILG", "DPWH"],
-  "Safety": ["BFP", "DOLE", "DILG", "LGU"],
-  "Cybersecurity": ["DICT", "NBI", "DTI", "DND"],
-  "Operational": ["DTI", "DOH", "DILG", "LGU"],
-  "Legal": ["DOJ", "DILG", "LGU", "SEC"],
-  "Health": ["DOH", "LGU", "DSWD", "PhilHealth"]
+const agenciesByCategory: Record<string, string[]> = {
+  'Natural Disaster': ['NDRRMC', 'PAGASA', 'PHIVOLCS', 'DILG', 'DPWH'],
+  Safety: ['BFP', 'DOLE', 'DILG', 'LGU'],
+  Cybersecurity: ['DICT', 'NBI', 'DTI', 'DND'],
+  Operational: ['DTI', 'DOH', 'DILG', 'LGU'],
+  Legal: ['DOJ', 'DILG', 'LGU', 'SEC'],
+  Health: ['DOH', 'LGU', 'DSWD', 'PhilHealth'],
 };
 
-export function ResponsePhase() {
-  const [actions, setActions] = useState(mockActions);
-  const [risks, setRisks] = useState(mockRisks);
-  const [loading, setLoading] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState('All');
-  const [showAddActionModal, setShowAddActionModal] = useState(false);
-  const [selectedRisk, setSelectedRisk] = useState('');
-  const [selectedStrategy, setSelectedStrategy] = useState('');
-  const [newAction, setNewAction] = useState({
+// ===== TYPES =====
+type Risk = (typeof mockRisks)[0];
+
+interface Action {
+  id: number;
+  action_type: string;
+  description: string;
+  status: 'Planned' | 'In Progress' | 'Completed' | 'On Hold';
+  priority: string;
+  risk_id: number;
+  risk_category: string;
+  assigned_agency: string;
+  local_controls: string;
+  timeline: string;
+  resources_needed: string;
+  responsible_team: string;
+  created_at: string;
+  risk_title?: string;
+}
+
+type NewActionForm = {
+  action_type: string;
+  description: string;
+  status: 'Planned' | 'In Progress' | 'Completed' | 'On Hold';
+  priority: string;
+  risk_id: string;
+  risk_category: string;
+  assigned_agency: string;
+  local_controls: string;
+  timeline: string;
+  resources_needed: string;
+  responsible_team: string;
+  custom_strategy: string;
+};
+
+// ✅ DEFAULT EXPORT — THIS IS THE KEY FIX
+const ResponsePhase: React.FC = () => {
+  const [actions, setActions] = useState<Action[]>(mockActions);
+  const [risks] = useState<Risk[]>(mockRisks);
+  const [selectedPriority, setSelectedPriority] = useState<string>('All');
+  const [showAddActionModal, setShowAddActionModal] = useState<boolean>(false);
+  const [selectedRisk, setSelectedRisk] = useState<string>('');
+  const [selectedStrategy, setSelectedStrategy] = useState<string>('');
+  const [newAction, setNewAction] = useState<NewActionForm>({
     action_type: '',
     description: '',
     status: 'Planned',
@@ -171,30 +220,40 @@ export function ResponsePhase() {
     timeline: '',
     resources_needed: '',
     responsible_team: '',
-    custom_strategy: ''
+    custom_strategy: '',
   });
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'Completed': return 'bg-green-100 text-green-800 border-green-300';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'Planned': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'On Hold': return 'bg-gray-100 text-gray-800 border-gray-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'Completed':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'Planned':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'On Hold':
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: string): string => {
     switch (priority) {
-      case 'Critical': return 'bg-red-600 text-white';
-      case 'High': return 'bg-orange-600 text-white';
-      case 'Medium': return 'bg-yellow-600 text-gray-900';
-      case 'Low': return 'bg-blue-600 text-white';
-      default: return 'bg-gray-600 text-white';
+      case 'Critical':
+        return 'bg-red-600 text-white';
+      case 'High':
+        return 'bg-orange-600 text-white';
+      case 'Medium':
+        return 'bg-yellow-600 text-gray-900';
+      case 'Low':
+        return 'bg-blue-600 text-white';
+      default:
+        return 'bg-gray-600 text-white';
     }
   };
 
-  const getPriorityFromRisk = (riskScore) => {
+  const getPriorityFromRisk = (riskScore: number): string => {
     if (riskScore >= 20) return 'Critical';
     if (riskScore >= 12) return 'High';
     if (riskScore >= 6) return 'Medium';
@@ -203,11 +262,11 @@ export function ResponsePhase() {
 
   const handleAddAction = () => {
     if (!newAction.action_type || !newAction.risk_id) return;
-    
-    const risk = risks.find(r => r.id.toString() === newAction.risk_id);
+
+    const risk = risks.find((r) => r.id.toString() === newAction.risk_id);
     const priority = newAction.priority || getPriorityFromRisk(risk?.risk_score || 0);
-    
-    const newActionObj = {
+
+    const newActionObj: Action = {
       id: actions.length + 1,
       action_type: newAction.action_type,
       description: newAction.description,
@@ -221,9 +280,9 @@ export function ResponsePhase() {
       resources_needed: newAction.resources_needed,
       responsible_team: newAction.responsible_team,
       created_at: new Date().toISOString(),
-      risk_title: risk?.title
+      risk_title: risk?.title,
     };
-    
+
     setActions([newActionObj, ...actions]);
     setNewAction({
       action_type: '',
@@ -237,46 +296,45 @@ export function ResponsePhase() {
       timeline: '',
       resources_needed: '',
       responsible_team: '',
-      custom_strategy: ''
+      custom_strategy: '',
     });
     setSelectedRisk('');
     setSelectedStrategy('');
     setShowAddActionModal(false);
   };
 
-  const handleRiskSelection = (riskId) => {
-    const risk = risks.find(r => r.id.toString() === riskId);
+  const handleRiskSelection = (riskId: string) => {
+    const risk = risks.find((r) => r.id.toString() === riskId);
     if (risk) {
       setSelectedRisk(riskId);
-      setNewAction({
-        ...newAction,
+      setNewAction((prev) => ({
+        ...prev,
         risk_id: riskId,
         risk_category: risk.category,
-        priority: getPriorityFromRisk(risk.risk_score)
-      });
+        priority: getPriorityFromRisk(risk.risk_score),
+      }));
     }
   };
 
-  const handleStrategySelection = (strategyObj) => {
+  const handleStrategySelection = (strategyObj: { strategy: string; timeline: string; resources: string }) => {
     setSelectedStrategy(strategyObj.strategy);
-    setNewAction({
-      ...newAction,
+    setNewAction((prev) => ({
+      ...prev,
       action_type: strategyObj.strategy,
       timeline: strategyObj.timeline,
-      resources_needed: strategyObj.resources
-    });
+      resources_needed: strategyObj.resources,
+    }));
   };
 
   const filteredActions = selectedPriority === 'All'
     ? actions
-    : actions.filter(a => a.priority === selectedPriority);
+    : actions.filter((a) => a.priority === selectedPriority);
 
-  const plannedCount = actions.filter(a => a.status === 'Planned').length;
-  const inProgressCount = actions.filter(a => a.status === 'In Progress').length;
-  const completedCount = actions.filter(a => a.status === 'Completed').length;
-  const criticalRisks = risks.filter(r => r.classification === 'Critical').length;
-
-  const riskCategories = [...new Set(risks.map(r => r.category))];
+  const plannedCount = actions.filter((a) => a.status === 'Planned').length;
+  const inProgressCount = actions.filter((a) => a.status === 'In Progress').length;
+  const completedCount = actions.filter((a) => a.status === 'Completed').length;
+  const criticalRisks = risks.filter((r) => r.classification === 'Critical').length;
+  const riskCategories = Array.from(new Set(risks.map((r) => r.category)));
 
   return (
     <div>
@@ -344,11 +402,11 @@ export function ResponsePhase() {
       <div className="bg-white rounded-lg shadow mb-6 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Treatment Coverage by Category</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {riskCategories.map(category => {
-            const categoryRisks = risks.filter(r => r.category === category);
-            const categoryActions = actions.filter(a => a.risk_category === category);
+          {riskCategories.map((category) => {
+            const categoryRisks = risks.filter((r) => r.category === category);
+            const categoryActions = actions.filter((a) => a.risk_category === category);
             const coverage = categoryRisks.length > 0 ? Math.round((categoryActions.length / categoryRisks.length) * 100) : 0;
-            
+
             return (
               <div key={category} className="border-2 rounded-lg p-4 bg-gradient-to-br from-red-50 to-orange-50">
                 <div className="flex items-center space-x-2 mb-2">
@@ -366,17 +424,21 @@ export function ResponsePhase() {
                   </div>
                   <div>
                     <span className="text-gray-600">Coverage:</span>
-                    <span className={`font-semibold ml-1 ${coverage >= 80 ? 'text-green-600' : coverage >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <span
+                      className={`font-semibold ml-1 ${
+                        coverage >= 80 ? 'text-green-600' : coverage >= 50 ? 'text-yellow-600' : 'text-red-600'
+                      }`}
+                    >
                       {coverage}%
                     </span>
                   </div>
                 </div>
                 {coverage < 100 && (
-                  <button 
+                  <button
                     onClick={() => {
                       setShowAddActionModal(true);
-                      const firstUnaddressedRisk = categoryRisks.find(r => 
-                        !categoryActions.some(a => a.risk_id === r.id)
+                      const firstUnaddressedRisk = categoryRisks.find(
+                        (r) => !categoryActions.some((a) => a.risk_id === r.id)
                       );
                       if (firstUnaddressedRisk) {
                         handleRiskSelection(firstUnaddressedRisk.id.toString());
@@ -400,28 +462,33 @@ export function ResponsePhase() {
             Critical Risks Requiring Immediate Response
           </h3>
           <div className="space-y-3">
-            {risks.filter(r => r.classification === 'Critical').slice(0, 3).map((risk) => {
-              const hasTreatment = actions.some(a => a.risk_id === risk.id);
-              return (
-                <div key={risk.id} className="bg-white rounded p-3 border border-red-200 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">{risk.title}</div>
-                    <div className="text-sm text-red-700">Risk Score: {risk.risk_score} | {risk.classification}</div>
+            {risks
+              .filter((r) => r.classification === 'Critical')
+              .slice(0, 3)
+              .map((risk) => {
+                const hasTreatment = actions.some((a) => a.risk_id === risk.id);
+                return (
+                  <div key={risk.id} className="bg-white rounded p-3 border border-red-200 flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">{risk.title}</div>
+                      <div className="text-sm text-red-700">
+                        Risk Score: {risk.risk_score} | {risk.classification}
+                      </div>
+                    </div>
+                    {!hasTreatment && (
+                      <button
+                        onClick={() => {
+                          setShowAddActionModal(true);
+                          handleRiskSelection(risk.id.toString());
+                        }}
+                        className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                      >
+                        Add Treatment
+                      </button>
+                    )}
                   </div>
-                  {!hasTreatment && (
-                    <button 
-                      onClick={() => {
-                        setShowAddActionModal(true);
-                        handleRiskSelection(risk.id.toString());
-                      }}
-                      className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
-                    >
-                      Add Treatment
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       )}
@@ -430,7 +497,7 @@ export function ResponsePhase() {
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Response Actions & Treatment Canvas</h3>
           <div className="flex space-x-2">
-            {['All', 'Critical', 'High', 'Medium', 'Low'].map(priority => (
+            {['All', 'Critical', 'High', 'Medium', 'Low'].map((priority) => (
               <button
                 key={priority}
                 onClick={() => setSelectedPriority(priority)}
@@ -533,15 +600,21 @@ export function ResponsePhase() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
             <h4 className="font-semibold text-blue-900 mb-2">NDRRMC</h4>
-            <p className="text-sm text-blue-800">National Disaster Risk Reduction and Management Council - Primary coordination</p>
+            <p className="text-sm text-blue-800">
+              National Disaster Risk Reduction and Management Council - Primary coordination
+            </p>
           </div>
           <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
             <h4 className="font-semibold text-green-900 mb-2">DILG</h4>
-            <p className="text-sm text-green-800">Department of Interior and Local Government - LGU coordination</p>
+            <p className="text-sm text-green-800">
+              Department of Interior and Local Government - LGU coordination
+            </p>
           </div>
           <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
             <h4 className="font-semibold text-purple-900 mb-2">DTI</h4>
-            <p className="text-sm text-purple-800">Department of Trade and Industry - Business continuity support</p>
+            <p className="text-sm text-purple-800">
+              Department of Trade and Industry - Business continuity support
+            </p>
           </div>
           <div className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50">
             <h4 className="font-semibold text-orange-900 mb-2">LGU</h4>
@@ -560,7 +633,7 @@ export function ResponsePhase() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-6">
               {/* Risk Selection */}
               <div>
@@ -571,14 +644,14 @@ export function ResponsePhase() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">Choose a risk from your risk register</option>
-                  {risks.map(risk => (
+                  {risks.map((risk) => (
                     <option key={risk.id} value={risk.id}>
                       {risk.title} - {risk.classification} (Score: {risk.risk_score})
                     </option>
                   ))}
                 </select>
               </div>
-              
+
               {selectedRisk && (
                 <>
                   {/* Pre-defined Strategies */}
@@ -603,64 +676,68 @@ export function ResponsePhase() {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Custom Strategy */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Custom Treatment Strategy</label>
                     <input
                       type="text"
                       value={newAction.action_type}
-                      onChange={(e) => setNewAction({...newAction, action_type: e.target.value})}
+                      onChange={(e) => setNewAction({ ...newAction, action_type: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="Enter custom treatment strategy"
                     />
                   </div>
-                  
+
                   {/* Action Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                       <textarea
                         value={newAction.description}
-                        onChange={(e) => setNewAction({...newAction, description: e.target.value})}
+                        onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                        rows="2"
+                        rows={2}
                         placeholder="Describe the treatment action in detail"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Timeline</label>
                       <input
                         type="text"
                         value={newAction.timeline}
-                        onChange={(e) => setNewAction({...newAction, timeline: e.target.value})}
+                        onChange={(e) => setNewAction({ ...newAction, timeline: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="e.g., 2 weeks, 3 months"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Agency</label>
                       <select
                         value={newAction.assigned_agency}
-                        onChange={(e) => setNewAction({...newAction, assigned_agency: e.target.value})}
+                        onChange={(e) => setNewAction({ ...newAction, assigned_agency: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                       >
                         <option value="">Select assigned agency</option>
-                        {agenciesByCategory[newAction.risk_category]?.map(agency => (
-                          <option key={agency} value={agency}>{agency}</option>
+                        {agenciesByCategory[newAction.risk_category]?.map((agency) => (
+                          <option key={agency} value={agency}>
+                            {agency}
+                          </option>
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                       <select
                         value={newAction.status}
-                        onChange={(e) => setNewAction({...newAction, status: e.target.value})}
+                        onChange={(e) =>
+                          setNewAction({ ...newAction, status: e.target.value as NewActionForm['status'] })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                       >
                         <option value="Planned">Planned</option>
@@ -670,42 +747,42 @@ export function ResponsePhase() {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Local Controls & Philippine Context</label>
                     <textarea
                       value={newAction.local_controls}
-                      onChange={(e) => setNewAction({...newAction, local_controls: e.target.value})}
+                      onChange={(e) => setNewAction({ ...newAction, local_controls: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                      rows="2"
+                      rows={2}
                       placeholder="Specify Philippine-specific controls, regulations, or local requirements"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Resources Needed</label>
                       <input
                         type="text"
                         value={newAction.resources_needed}
-                        onChange={(e) => setNewAction({...newAction, resources_needed: e.target.value})}
+                        onChange={(e) => setNewAction({ ...newAction, resources_needed: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="List required resources"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Responsible Team</label>
                       <input
                         type="text"
                         value={newAction.responsible_team}
-                        onChange={(e) => setNewAction({...newAction, responsible_team: e.target.value})}
+                        onChange={(e) => setNewAction({ ...newAction, responsible_team: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="Team or department responsible"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-3 pt-4">
                     <button
                       onClick={() => setShowAddActionModal(false)}
@@ -730,4 +807,7 @@ export function ResponsePhase() {
       )}
     </div>
   );
-}
+};
+
+// ✅ DEFAULT EXPORT — MATCHES App.tsx IMPORT
+export default ResponsePhase;
